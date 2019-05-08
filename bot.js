@@ -89,12 +89,20 @@ client.on('ready', () => {
 					value: "adds a random seed combo"
 				},
 				{
+					name: "`random race background`",
+					value: "adds a random seed of the given combo"
+				},
+				{
 					name: "`list`",
 					value: "lists all the tracked seeds"
 				},
 				{
 					name: "`kill seed`",
 					value: "removes a seed from this list"
+				},
+				{
+					name: "`clear`",
+					value: "clears all seeds"
 				}
 			]
 			}});
@@ -123,9 +131,15 @@ client.on('ready', () => {
 			seeds.new(inMsg,match[1],match[2],match[3]);
 		}
 		//Create a. new random seed
+		else if (inMsg.content.toLowerCase().match(/^!random (..) (..)$/)) {
+			var match = inMsg.content.toLowerCase().match(/^!random (..) (..)$/);
+			seeds.randomSeed(inMsg,match[1],match[2]);
+		}
+
 		else if (inMsg.content.toLowerCase() === config.prefix+"random") {
 			seeds.random(inMsg);
 		}
+		
 		//List all active seeds
 		else if (inMsg.content.toLowerCase() === config.prefix+"list") {
 			seeds.readSeeds(inMsg);
@@ -138,6 +152,10 @@ client.on('ready', () => {
 		//score a seed
 		else if (inMsg.content.toLowerCase() === config.prefix+"score") {
 			e(inMsg, "score a seed");
+		}
+
+		else if (inMsg.content.toLowerCase() === config.prefix+"clear") {
+			seeds.clear(inMsg);
 		}
 		
 	});

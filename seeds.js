@@ -48,6 +48,18 @@ class Seeds {
 		inMsg.channel.send(newSeed.seed + ' : ' + newSeed.race + newSeed.background);
 		this.writeSeed(newSeed);
 	}
+	randomSeed(inMsg,race,background) {
+		console.log("2");
+		inMsg.channel.send("Creating new random seed for " + race + background);
+		let newSeed = new Seed(
+			Math.floor(Math.random()*1000000000000).toString(),
+			race,
+			background,
+			inMsg.author.username
+		);
+		inMsg.channel.send(newSeed.seed + ' : ' + newSeed.race + newSeed.background);
+		this.writeSeed(newSeed);
+	}
 
 	new(inMsg, seed, race, background) {		
 		console.log(util.inspect(inMsg.author.username));
@@ -57,9 +69,9 @@ class Seeds {
 
 	}
 	writeSeed(seed) {
-		var seeds = require('./seeds.json');
-		var update = false;
-		for (var i=0;i<seeds.length;i++) {
+		let seeds = require('./seeds.json');
+		let update = false;
+		for (let i=0;i<seeds.length;i++) {
 			if(seeds[i].seed === seed.seed) {
 				seeds[i] = seed;
 				update=true;
@@ -87,6 +99,14 @@ class Seeds {
 		}
 		console.log(util.inspect(seeds));
 		fs.writeFile('seeds.json',JSON.stringify(seeds),'utf8',function() {});
+	}
+	clear(inMsg) {
+		console.log("clearing seeds");
+		var seeds = require('./seeds.json');
+		seeds.length=0;
+		fs.writeFile('seeds.json',JSON.stringify(seeds),'utf8',function() {});
+		var seeds = require('./seeds.json');
+		console.log(seeds);
 	}
 
 }
