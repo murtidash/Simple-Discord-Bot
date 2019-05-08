@@ -1,4 +1,7 @@
 // Call all needed Packages
+const Seeds = require('./seeds.js');
+let seeds = new Seeds();
+
 var fs = require("fs");
 const Discord = require("discord.js");
 const time = require("moment");
@@ -11,9 +14,11 @@ config.debug = true;
 var botId = "";
 var AuthLink = "https://discordapp.com/oauth2/authorize?&client_id="+config.appId+"&scope=bot&permissions=0";
 var owner_whitelist = [
-	"329459428304617475"
+	""
 ]
 var bootUpGeneral = client.channels.get('364594803482034179');
+
+
 console.log("Starting Bot...".bold);
 
 
@@ -64,76 +69,34 @@ client.on('ready', () => {
 	client.on('message', inMsg => {
 		// Selected Auth
 		if(is_root(inMsg.author.id)){
-			if (inMsg.content.toLowerCase() === 'bot.stop') {
-				e(inMsg, "Ok, Bye :crying_cat_face:");
-				c("Shutdown Command Recived by " + inMsg.author.username + "#" + inMsg.author.discriminator);
-				setTimeout(function(){ process.exit(); }, 1000);
-			}
-			
-			else if (inMsg.content.toLowerCase() === 'bot.reload') {
-				d("Reloading Config ~ Triggered by: " + inMsg.author.username);
-				e(inMsg, ":warning: Reloading Config... :warning:");
-				var ds = config.debug;
-				config = JSON.parse(fs.readFileSync("config.json"));
-				config.debug = ds;
-				e(inMsg, ":white_check_mark: Reload Complete! ");
-				return;
-			}
-			
-			else if(inMsg.content.toLowerCase().startsWith("bot.status") == true) {
-				d("Changing Message");
-				var str = inMsg.content.replace("/^(bot\.status)\s{0,2}/", "");
-				client.user.setGame(str);
-				return;
-			}
+
 		
 		}
-		
-		
-		if (inMsg.content.toLowerCase() === 'bot.users') {
-			client.user.setGame(`with ` + client.users.size + ` Users`);
-		}
-		else if (inMsg.content.toLowerCase() === 'bot.servers') {
-			client.user.setGame(`on ` + client.guilds.size + ` servers`);
-		}
-		
-		// else if(inMsg.content.toLowerCase() === 'bot.f') {
-			// client.addFriend(inMsg.author.id).then(u => {
-				// u.createDM().then(chnl => {
-					// chnl.send("A message will go here.")
-				// });
-			// })
-		// }
-		
+
 		// Server Specific Commands
 		else if(inMsg.content.toLowerCase() === config.prefix+"h") {
 		inMsg.channel.send({embed: {
 				color: 3447003,
-			author: {
-				name: client.user.username,
-				icon_url: client.user.avatarURL,
-			},
-			title: "Commands for Simple Discord Bot",
-				url: "http://sdbot.ml/",
+			title: "Commands for dcss seed bot",
+				url: "",
 				description: "List of Commands the the Bot Supports",
 				fields: [{
-					name: "`online?`",
-					value: "Tells you the amount of Users detected by the Bot in all of the servers it is on."
+					name: "`new seed race background`",
+					value: "adds a new seed combo"
 				},
 				{
-					name: "`I hate you!`",
-					value: "Messages you letting you know that it wants to be friends with you!"
+					name: "`random`",
+					value: "adds a random seed combo"
 				},
 				{
-					name: "`hello`",
-					value: "Says Hi back yo you!"
+					name: "`list`",
+					value: "lists all the tracked seeds"
+				},
+				{
+					name: "`kill seed`",
+					value: "removes a seed from this list"
 				}
-			],
-			footer: {
-				icon_url: "https://cdn.discordapp.com/attachments/351544209439850507/364349134611677184/e069e0e6720376e0ec7958695e9cbf33.png",
-				text: "Simple Discord Bot by: Noah Halstead (@nhalstead)"
-			}
-			
+			]
 			}});
 		}
 		
@@ -153,79 +116,29 @@ client.on('ready', () => {
 		
 		
 		// Text Based Commands
-		else if (inMsg.content.toLowerCase() === 'online?') {
-			e(inMsg, "Yup, I have been on for " + m2ms(client.uptime));
+		//Seed stuff
+		//Create a new seed
+		else if (inMsg.content.toLowerCase().match(/^!new (\d*) (..) (..)$/)) {
+			var match = inMsg.content.toLowerCase().match(/^!new (\d*) (..) (..)$/);
+			seeds.new(inMsg,match[1],match[2],match[3]);
 		}
-		
-		else if (inMsg.content.toLowerCase().includes("...")) {
-			e(inMsg, "...");
+		//Create a. new random seed
+		else if (inMsg.content.toLowerCase() === config.prefix+"random") {
+			seeds.random(inMsg);
 		}
-		
-		else if (inMsg.content.toLowerCase().match("(^time|^what time is it|^"+config.prefix+"bottime)")) {
-			e(inMsg, "It is " + timeT());
+		//List all active seeds
+		else if (inMsg.content.toLowerCase() === config.prefix+"list") {
+			seeds.readSeeds(inMsg);
 		}
-		
-		else if (inMsg.content.toLowerCase().match("(^hello|^hi|^yo|^sup|^anyone on)")) {
-			// Uing the Regex I made: https://regex101.com/r/jhfhCa/1
-			var a = [
-				"Hi",
-				"Hola",
-				"Hello",
-				"Meep"
-			];
-			e(inMsg, arraygr(a));
+		//Mark a seed inactive
+		else if (inMsg.content.toLowerCase().match(/^!kill (\d*)$/)) {
+			var match = inMsg.content.toLowerCase().match(/^!kill (\d*)$/);
+			seeds.kill(inMsg,match[1]);
 		}
-		
-		else if (inMsg.content.toLowerCase().match("meep")) {
-			e(inMsg, "...");
+		//score a seed
+		else if (inMsg.content.toLowerCase() === config.prefix+"score") {
+			e(inMsg, "score a seed");
 		}
-		
-		else if (inMsg.content.toLowerCase().match("^i hate you((.?|.{2,32})$)")) {
-			// Uing the Regex I made: https://regex101.com/r/5gk2pI/2
-			c("Sent Message to " + inMsg.author.username);
-			s(inMsg, "Can we be Friends?");
-			e(inMsg, "Are you sure? I'd Like to be friends!");
-		}
-		
-		else if(inMsg.content.toLowerCase() === config.prefix+"botuser") {
-		inMsg.channel.send({embed: {
-				color: 3447003,
-			author: {
-				name: client.user.username,
-				icon_url: client.user.avatarURL
-			}
-			}});
-		}
-		
-		else if(inMsg.content.toLowerCase() === config.prefix+"credit") {
-		inMsg.channel.send({embed: {
-				color: 3447003,
-			author: {
-				name: "nhalstead",
-				icon_url: "https://cdn.discordapp.com/attachments/351544209439850507/364349134611677184/e069e0e6720376e0ec7958695e9cbf33.png"
-			}
-			}});
-		}
-		
-		else if(inMsg.content.toLowerCase().match("^yes(.?|.{2,32})$") ) {
-			e(inMsg, "no");
-		}
-		
-		else if(inMsg.content.toLowerCase() === config.prefix+"users") {
-			e(inMsg, client.users.size + " users attached to this the Bot. ("+client.guilds.size +" on this Server)");
-		}
-		
-		else if (inMsg.content.toLowerCase() === config.prefix+'ping') {
-			e(inMsg, "PONG!");
-		}
-		
-		else if(inMsg.content.toLowerCase() === config.prefix+"servericon") {
-			e(inMsg, 'blah');
-		}
-		
-		//Echo the Auth Link to add the bot to your Server
-		else if(inMsg.content.toLowerCase() === config.prefix+"sdb") { e(inMsg, AuthLink); }
-
 		
 	});
 
